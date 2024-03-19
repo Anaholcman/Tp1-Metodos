@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## ej1
 ##habria que hacer interpolacion lineal para acercarnos a todos los puntos
 
@@ -13,3 +14,9 @@ def separarNumeros():
         x.append(mediciones[i][0])
         y.append(mediciones[i][1])
     return x, y
+=======
+print("hola tizzzzzz")
+print("huola anu")
+print("probando github")
+#hhhh
+print("hola")
