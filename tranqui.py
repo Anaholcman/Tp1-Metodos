@@ -2,15 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import lagrange
 
-# Función dada
 def f(x):
     return (0.3) ** np.abs(x) * np.sin(4 * x) - np.tanh(2 * x) + 2
 
-# Generar puntos de datos en el intervalo [-4, 4]
-x_data = np.linspace(-4, 4, num=30)  # Usamos 9 puntos equidistantes
+# el intervalo [-4, 4]
+x_data = np.linspace(-4, 4, num=30)  # Usamos 30 puntos equidistantes
 y_data = f(x_data)
 
-# Lista para almacenar los polinomios de Lagrange lineales
 polys = []
 
 # Interpolar linealmente entre los puntos de datos
