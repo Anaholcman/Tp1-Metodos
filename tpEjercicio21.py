@@ -39,6 +39,9 @@ tck_x2_cubic = splrep(time_measurements, x2_measurements, k=3)
 x1_interpolated_linear = interpolator_x1_linear(time_interpolation)
 x2_interpolated_linear = interpolator_x2_linear(time_interpolation)
 
+def interpolator_quadratic():
+    return interpolator_x1_quadratic, interpolator_x2_quadratic
+
 # Calcular las posiciones interpoladas cuadráticas
 x1_interpolated_quadratic = interpolator_x1_quadratic(time_interpolation)
 x2_interpolated_quadratic = interpolator_x2_quadratic(time_interpolation)
