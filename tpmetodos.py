@@ -27,23 +27,23 @@ def lagrange_iterator(start, stop, f, degree):
         degree_evolution[i-1]=lagrange_interpolation(data_set)
     return degree_evolution
 
-def error_average(interpolator, f, x_values):
+def error_median(interpolator, f, x_values):
     y_values_interp = interpolator(x_values)
     y_values_exact = f(x_values)
     error = np.abs(y_values_exact - y_values_interp)
-    return np.mean(error)
+    return np.median(error)
 
 def main():
     start = -4
     stop = 4
-    degree = 20
+    degree = 30
     x_values = np.linspace(start, stop, 1000)
     errors = []
     interpolators_dict = lagrange_iterator(start, stop, f_a, degree)
     
     for i in range(2, degree+2):
         interpolator = interpolators_dict[i-1]
-        error = error_average(interpolator, f_a, x_values)
+        error = error_median(interpolator, f_a, x_values)
         errors.append(error)
     
     plt.plot(range(1, degree + 1), errors, marker='o')
@@ -68,3 +68,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
