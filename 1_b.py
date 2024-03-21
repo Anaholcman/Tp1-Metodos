@@ -1,49 +1,53 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from scipy.interpolate import RegularGridInterpolator
+from scipy.interpolate import interp2d
+from scipy.interpolate import RectBivariateSpline
 
-# Definir la función tridimensional f_b
-def f_b(x):
-    x1, x2, x3 = x
+def original_function(x1, x2):
     return 0.75 * np.exp(-((10*x1 - 2)**2) / 4 - ((9*x2 - 2)**2) / 4) + \
-           0.65 * np.exp(-((9*x1 + 1)**2) / 9 - ((10*x2 + 1)**2) / 2) + \
-           0.55 * np.exp(-((9*x1 - 6)**2) / 4 - ((9*x2 - 3)**2) / 4) - \
-           0.01 * np.exp(-((9*x1 - 7)**2) / 4 - ((9*x2 - 3)**2) / 4)
+        0.65 * np.exp(-((9*x1 + 1)**2) / 9 - ((10*x2 + 1)**2) / 2) + \
+        0.55 * np.exp(-((9*x1 - 6)**2) / 4 - ((9*x2 - 3)**2) / 4) - \
+        0.01 * np.exp(-((9*x1 - 7)**2) / 4 - ((9*x2 - 3)**2) / 4)
 
-# Generar datos para la interpolación
-x1_values = np.linspace(-1, 1, 10)
-x2_values = np.linspace(-1, 1, 10)
-x3_values = np.linspace(-1, 1, 10)
-X1, X2, X3 = np.meshgrid(x1_values, x2_values, x3_values)
-data = f_b((X1, X2, X3))
+x1 = np.linspace(-1, 1, 100)
+x2 = np.linspace(-1, 1, 100)
 
-# Crear el interpolador tridimensional
-interpolator = RegularGridInterpolator((x1_values, x2_values, x3_values), data)
+# Evaluar la función original en los puntos
+X1, X2 = np.meshgrid(x1, x2)
+Z = original_function(X1, X2)
 
-# Generar una malla de puntos dentro del rango [-1, 1] en cada dimensión
-x = np.linspace(-1, 1, 50)
-X, Y, Z = np.meshgrid(x, x, x)
-points = np.column_stack((X.flatten(), Y.flatten(), Z.flatten()))
+f = RectBivariateSpline(x1, x2, Z)
 
-# Evaluar la función interpolada en los puntos de la malla
-interpolated_values = interpolator(points).reshape(X.shape)
+# Definir puntos de malla más fina para la superficie interpolada
+x1_new = np.linspace(-1, 1, 20)
+x2_new = np.linspace(-1, 1, 20)
+X1_new, X2_new = np.meshgrid(x1_new, x2_new)
+Z_new = f(x1_new, x2_new)
 
-# Aplanar las matrices 3D generadas por np.meshgrid
-X = X.flatten()
-Y = Y.flatten()
-Z = Z.flatten()
+error = np.abs(original_function(X1_new, X2_new) - f(x1_new, x2_new))
 
-# Evaluar la función interpolada en los puntos de la malla
-interpolated_values = interpolator(np.column_stack((X, Y, Z))).reshape(X.shape)
+fig = plt.figure(figsize=(12, 6))# Graficar la función original
+
+
+ax1 = fig.add_subplot(1, 3, 1, projection='3d')
+ax1.plot_surface(X1, X2, Z, cmap='viridis')
+ax1.set_title('Función Original')
 
 # Graficar la función interpolada
-fig = plt.figure(figsize=(10, 8))
-ax = fig.add_subplot(111, projection='3d')
-ax.plot_trisurf(X, Y, Z, cmap=plt.cm.viridis, linewidth=0.2, antialiased=True)  # Superficie interpolada
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
-ax.set_title('Interpolación tridimensional')
+ax2 = fig.add_subplot(1, 3, 2, projection='3d')
+ax2.plot_surface(X1_new, X2_new, Z_new, cmap='plasma')
+ax2.set_title('Función Interpolada')
+
+# Graficar el error
+ax3 = fig.add_subplot(1, 3, 3)
+ax3.plot(X1_new.flatten(), X2_new.flatten(), error.flatten(), 'b.')
+ax3.set_title('Error')
+ax3.set_xlabel('x1')
+ax3.set_ylabel('x2')
+
+
+# Mostrar los gráficos
+plt.tight_layout()
 plt.show()
 
+print("Error máximo:", np.max(error))

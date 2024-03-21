@@ -26,13 +26,13 @@ def calculate_errors(original_values, interpolated_values):
     max_abs_err = np.max(abs_err)
     max_rel_err = np.max(rel_err)
     
-    avg_abs_err = np.mean(abs_err)
+    avg_abs_err = np.mean(abs_err) #devuelve el prom
     avg_rel_err = np.mean(rel_err)
     
     return max_abs_err, max_rel_err, avg_abs_err, avg_rel_err
 
 
-a, b = -4, 4 # Intervalo
+a, b = -4, 4 
 
 
 n = 15 # Número de puntos de Chebyshev
