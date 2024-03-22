@@ -41,26 +41,7 @@ z_cheb = f(x1_cheb_interp, x2_cheb_interp)
 X1_cheb_mesh, X2_cheb_mesh = np.meshgrid(x1_cheb_interp, x2_cheb_interp)
 
 
-
-
-
-fig = plt.figure(figsize=(12, 6))
-
-ax1 = fig.add_subplot(1, 3, 1, projection='3d')
-ax1.plot_surface(x1_mesh_orig, x2_mesh_orig, z_mesh_orig, cmap='viridis')
-ax1.set_title('Función Original')
-
-# función interpolada
-ax2 = fig.add_subplot(1, 3, 2, projection='3d')
-ax2.plot_surface(x1_interp_mesh, x2_interp_mesh, z_interp, cmap='plasma')
-ax2.set_title('Función Interpolada')
-
-#  función chebvyshev
-ax3 = fig.add_subplot(1, 3, 3, projection='3d') 
-ax3.plot_surface(X1_cheb_mesh, X2_cheb_mesh, z_cheb, cmap='Blues')#dame otrp cmap
-ax3.set_title('Función chebvyshev')
-
-# Calcular el error relativo de ambas
+# error rela y abs
 error_interp = np.abs(original_function(x1_interp_mesh, x2_interp_mesh) - f(x1_interp, x2_interp))/np.abs(original_function(x1_interp_mesh, x2_interp_mesh))
 error_interp_abs = np.abs(original_function(x1_interp_mesh, x2_interp_mesh) - f(x1_interp, x2_interp))
 error_cheb = np.abs(original_function(x1_cheb_interp, x2_cheb_interp) - f(x1_cheb_interp, x2_cheb_interp))/np.abs(original_function(x1_cheb_interp, x2_cheb_interp))
@@ -74,14 +55,71 @@ error_cheb_abs_max = np.max(error_cheb_abs)
 equi_text = f"Error relativo:\n{error_rel_max}\nError absoluto:\n{error_abs_max}"
 cheb_text = f"Error relativo:\n{error_cheb_rel_max}\nError absoluto:\n{error_cheb_abs_max}"
 
-## quiero que abajo de los graficos de interpolacion y de chevbyshev aparezca el error
-plt.subplots_adjust(bottom=0.2)
-plt.figtext(0.48, 0.05, equi_text, ha="center", fontsize=10)
-plt.figtext(0.76, 0.05, cheb_text, ha="center", fontsize=10)
-
 ##hacer un grafico que muestre mientras mas puntos el error de cada una de las interpolaciones
+def error_puntos(funcion, x1, x2, puntos):
+    error = []
+    for i in range(2, puntos+1):
+        x1_point = np.linspace(-1, 1, i)
+        y_point = np.linspace(-1, 1, i)
+        z_point = funcion(x1_point, y_point)
+        error.append(np.max(np.abs(original_function(x1_point, y_point) - z_point))/np.max(np.abs(original_function(x1_point, y_point))))
+    return error
 
 
+fig = plt.figure(figsize=(12, 9))
+
+ax1 = fig.add_subplot(2, 3, 1, projection='3d')
+ax1.plot_surface(x1_mesh_orig, x2_mesh_orig, z_mesh_orig, cmap='viridis')
+ax1.set_title('Función Original')
+
+# función interpolada
+ax2 = fig.add_subplot(2, 3, 2, projection='3d')
+ax2.plot_surface(x1_interp_mesh, x2_interp_mesh, z_interp, cmap='plasma')
+ax2.text2D(0.05, -0.2, equi_text, transform=ax2.transAxes, fontsize=10, color='red', bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
+ax2.set_title('Función Interpolada')
+
+#  función chebvyshev
+ax3 = fig.add_subplot(2, 3, 3, projection='3d') 
+ax3.plot_surface(X1_cheb_mesh, X2_cheb_mesh, z_cheb, cmap='Blues')
+ax3.text2D(0.05,-0.2, cheb_text, transform=ax3.transAxes, fontsize=10, color='red', bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
+ax3.set_title('Función chebvyshev')
+
+# ##hacer un grafico que muestre mientras mas puntos el error de cada una de las interpolaciones
+
+
+# Graficar el error de cada interpolación
+num_points = range(2, 21)
+error_equi = error_puntos(f, x1, x2, 20)
+error_chebyshev = error_puntos(f, x1_cheb_interp, x2_cheb_interp, 20)
+
+#corregir esto!!!!!!
+'''ax4 = fig.add_subplot(2, 3, 5)
+ax4.plot(num_points, error_equi, marker='o', label='Equidistant')
+ax4.set_xlabel('Number of Points')
+ax4.set_ylabel('Relative Error')
+ax4.set_title('Error vs Number of Points (Equidistant)')
+ax4.legend()
+
+ax5 = fig.add_subplot(2, 3, 6)
+ax5.plot(num_points, error_chebyshev, marker='o', label='Chebyshev')
+ax5.set_xlabel('Number of Points')
+ax5.set_ylabel('Relative Error')
+ax5.set_title('Error vs Number of Points (Chebyshev)')
+ax5.legend()'''
+
+
+
+
+plt.subplots_adjust(bottom=0.2)
 plt.tight_layout()
 plt.show()
+
+
+
+
+
+
+
+
+
 

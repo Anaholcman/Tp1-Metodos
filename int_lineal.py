@@ -1,14 +1,33 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import lagrange
+import sympy as sp
 
 
 
 def f_original(x):
     return (0.3) ** np.abs(x) * np.sin(4 * x) - np.tanh(2 * x) + 2
 
-f_prima = np.diff(f_original)
-print(f_prima)
+#calcuñar minimos y maximos
+'''## quiero calcular e imprimir la funcion prima de f_original
+x = sp.symbols('x', real=True)
+f = (0.3) ** sp.Abs(x) * sp.sin(4 * x) - sp.tanh(2 * x) + 2
+f_prima = sp.diff(f, x)
+puntos_criticos = sp.solve(f_prima, x)
+maximos_locales = []
+minimos_locales = []
+for punto in puntos_criticos:
+    if f_prima.subs(x, punto) < 0:
+        maximos_locales.append(punto)
+    elif f_prima.subs(x, punto) > 0:
+        minimos_locales.append(punto)
+
+
+print(puntos_criticos)
+print(maximos_locales)
+print(minimos_locales)'''
+
+
 
 def absolute_error(original_values, interpolated_values):
     return np.abs(original_values - interpolated_values)
