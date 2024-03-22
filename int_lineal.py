@@ -7,6 +7,9 @@ from scipy.interpolate import lagrange
 def f_original(x):
     return (0.3) ** np.abs(x) * np.sin(4 * x) - np.tanh(2 * x) + 2
 
+f_prima = np.diff(f_original)
+print(f_prima)
+
 def absolute_error(original_values, interpolated_values):
     return np.abs(original_values - interpolated_values)
 
@@ -31,6 +34,8 @@ def calculate_errors(original_values, interpolated_values):
 ##### Interpolación lineal de Lagrange #####
 x_data = np.linspace(-4, 4, num=15)  # Usamos 20 puntos equidistantes
 y_data = f_original(x_data)
+
+
 
 polys = []
 

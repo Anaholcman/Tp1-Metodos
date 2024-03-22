@@ -35,10 +35,10 @@ def chebyshev_points(a, b, n):
     k = np.arange(1, n+1)
     return 0.5 * (a + b) + 0.5 * (b - a) * np.cos((2 * k - 1) / (2 * n) * np.pi)
 
-x_cheb = np.sort(chebyshev_points(-1, 1, 20))
-y_cheb = np.sort(chebyshev_points(-1, 1, 20))
-z_cheb = f(x_cheb, y_cheb)
-X1_cheb, X2_cheb = np.meshgrid(x_cheb, y_cheb)
+x1_cheb_interp = np.sort(chebyshev_points(-1, 1, 20))
+x2_cheb_interp = np.sort(chebyshev_points(-1, 1, 20))
+z_cheb = f(x1_cheb_interp, x2_cheb_interp)
+X1_cheb_mesh, X2_cheb_mesh = np.meshgrid(x1_cheb_interp, x2_cheb_interp)
 
 
 
@@ -57,24 +57,31 @@ ax2.set_title('Función Interpolada')
 
 #  función chebvyshev
 ax3 = fig.add_subplot(1, 3, 3, projection='3d') 
-ax3.plot_surface(X1_cheb, X2_cheb, z_cheb, cmap='Blues')#dame otrp cmap
+ax3.plot_surface(X1_cheb_mesh, X2_cheb_mesh, z_cheb, cmap='Blues')#dame otrp cmap
 ax3.set_title('Función chebvyshev')
 
-# Calcular el error
-error_interp = np.abs(z_interp - original_function(x1_interp_mesh, x2_interp_mesh))
-error_cheb = np.abs(z_cheb - original_function(X1_cheb, X2_cheb))
+# Calcular el error relativo de ambas
+error_interp = np.abs(original_function(x1_interp_mesh, x2_interp_mesh) - f(x1_interp, x2_interp))/np.abs(original_function(x1_interp_mesh, x2_interp_mesh))
+error_interp_abs = np.abs(original_function(x1_interp_mesh, x2_interp_mesh) - f(x1_interp, x2_interp))
+error_cheb = np.abs(original_function(x1_cheb_interp, x2_cheb_interp) - f(x1_cheb_interp, x2_cheb_interp))/np.abs(original_function(x1_cheb_interp, x2_cheb_interp))
+error_cheb_abs = np.abs(original_function(x1_cheb_interp, x2_cheb_interp) - f(x1_cheb_interp, x2_cheb_interp))
 
-error_max = np.max(error_interp)
-error_cheb_max = np.max(error_cheb)
+error_abs_max = np.max(error_interp_abs)
+error_rel_max = np.max(error_interp)
+error_cheb_rel_max = np.max(error_cheb)
+error_cheb_abs_max = np.max(error_cheb_abs)
+
+equi_text = f"Error relativo:\n{error_rel_max}\nError absoluto:\n{error_abs_max}"
+cheb_text = f"Error relativo:\n{error_cheb_rel_max}\nError absoluto:\n{error_cheb_abs_max}"
 
 ## quiero que abajo de los graficos de interpolacion y de chevbyshev aparezca el error
 plt.subplots_adjust(bottom=0.2)
-plt.figtext(0.48, 0.05, f"Error interpolación:\n{error_max}", ha="center", fontsize=10)
-plt.figtext(0.76, 0.05, f"Error chebvyshev:\n{error_cheb_max}", ha="center", fontsize=10)
+plt.figtext(0.48, 0.05, equi_text, ha="center", fontsize=10)
+plt.figtext(0.76, 0.05, cheb_text, ha="center", fontsize=10)
 
+##hacer un grafico que muestre mientras mas puntos el error de cada una de las interpolaciones
 
 
 plt.tight_layout()
 plt.show()
 
-#print("Error máximo:", np.max(error))
