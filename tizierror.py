@@ -52,7 +52,7 @@ def main():
     plt.ylabel('Error promedio de interpolación')
     plt.title('Error de interpolación vs. Grado del polinomio')
     plt.grid(True)
-    #plt.show()
+    plt.show()
 
     # podemos evaluar cual es el grado del polinomio que se corresponde con el menor error, y comparar ambos gráficos
         
