@@ -45,7 +45,7 @@ for i, poly in enumerate(polys):
     mask = (x_values_lineal >= x_data_lineal[i]) & (x_values_lineal <= x_data_lineal[i+1])
     y_values_interpolated[mask] = poly(x_values_lineal[mask])
 
-# Interpolación cúbica
+# Interpolación cúbica----------
 
 x_interp_splines = np.linspace(-4, 4, 15)  
 y_interp_splines = f_original(x_interp_splines)
@@ -55,7 +55,34 @@ spline = CubicSpline(x_interp_splines, y_interp_splines)
 x_value_splines = np.linspace(-4, 4, 1000)
 y_value_splines = spline(x_value_splines)
     
+#interpolacion polinomica----------------
+x_values_polinomic = np.linspace(-4, 4, 1000)# conjunto de puntos para graficar las interpolaciones lineales
+y_values_polinomic = np.zeros_like(x_values_lineal)
+def equispaced_dataset_build(points_number, f): # points_number>=2
+    data_set = []
+    for x_i in np.linspace(-4, 5, points_number):     # genera puntos equiespaciados
+        data_set.append([x_i, f(x_i)])
+    return data_set
 
+def lagrange_interpolation(data_set):
+    x_values = [point[0] for point in data_set]
+    y_values = [point[1] for point in data_set]
+    interpolator = lagrange(x_values, y_values)     
+    return interpolator                             
+
+
+y_values_polinomic = f_original(x_values_polinomic)
+plt.plot(x_values_polinomic, y_values_polinomic, label='f_a(x)')
+    
+
+data_set_20 = equispaced_dataset_build(10, f_original)
+interpolator_poli = lagrange_interpolation(data_set_20)
+yvalues_polinomic = interpolator_poli(x_values_polinomic)
+plt.plot(x_values_polinomic, yvalues_polinomic, label='p_a(x)', linestyle='--')
+    
+# Graficar los puntos utilizados por el polinomio interpolante
+x_interp_points = [point[0] for point in data_set_20]
+y_interp_points = [point[1] for point in data_set_20]
 
 
 #error-----------
@@ -90,6 +117,7 @@ def texto_error(max_abs_err, max_rel_err, avg_abs_err, avg_rel_err):
 error_text_chevbyshev = calculate_errors(y_original, y_interpolated_bychev) ## es lo mismo pero mejor cambiar a como estan las otras
 error_text_lineal = calculate_errors(f_original(x_values_lineal), y_values_interpolated)
 error_text_spline = calculate_errors(f_original(x_value_splines), y_value_splines)
+error_text_polinomic = calculate_errors(y_values_polinomic, yvalues_polinomic)
 
 
 fig = plt.figure(figsize=(25, 6))
@@ -120,8 +148,18 @@ ax2.text(a, np.min(y_original), error_text_chevbyshev, fontsize=8, va='bottom', 
 ax2.legend()
 ax2.grid(True)
 
-#falta poner aca la interpolacion polinomica
-
+#interpolacion polinomica
+ax3 = fig.add_subplot(2, 2, 3)
+ax3.scatter(x_interp_points, y_interp_points, color='black', label='Puntos de interpolación')
+ax3.plot(x_values_polinomic, yvalues_polinomic, label='Interpolacion', linestyle='--', color='red')
+ax3.plot(x_values_polinomic, y_values_polinomic, label='Funcion original', color='violet')
+ax3.set_xlabel('x')
+ax3.set_ylabel('y')
+ax3.set_xlim(-4.5, 4.5)
+ax3.set_title('Interpolacion Polinomica')
+ax3.text(-4, np.min(y_values_polinomic), error_text_polinomic, fontsize=8, va='bottom', ha='left', color='red',  bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
+ax3.legend()
+ax3.grid(True)
 
 
 ##graf spline
