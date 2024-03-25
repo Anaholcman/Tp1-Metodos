@@ -4,51 +4,65 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.interpolate import splrep, splev
 from scipy.interpolate import lagrange
-import tpEjercicio21 as ej2
 from scipy.optimize import newton_krylov
 
 # Leer los datos
-measurements_df = pd.read_csv('mnyo_mediciones2.csv', header=None, delim_whitespace=True)
-ground_truth_df = pd.read_csv('mnyo_ground_truth.csv', header=None, delim_whitespace=True)
+measurements_t1 = pd.read_csv('mnyo_mediciones.csv', header=None, delim_whitespace=True)
+measurements_t2 = pd.read_csv('mnyo_mediciones2.csv', header=None, sep='\s+')
+ground_truth_t1 = pd.read_csv('mnyo_ground_truth.csv', header=None, sep='\s+')
 
 # Asignar nombres a las columnas
-measurements_df.columns = ['x1', 'x2']
+measurements_t1.columns = ['x1', 'x2']
+measurements_t2.columns = ['x1', 'x2']
 
 # Obtener los datos de las mediciones y el tiempo
-x1_measurements = measurements_df['x1'].values
-x2_measurements = measurements_df['x2'].values
-time_measurements = np.arange(len(measurements_df))
-time_interpolation = np.linspace(time_measurements.min(), time_measurements.max(), len(ground_truth_df))
+x1_measurements_t1 = measurements_t1['x1'].values
+x2_measurements_t1 = measurements_t1['x2'].values
+time_measurements_t1 = np.arange(len(measurements_t1))
+# time_interpolation_t1 = np.linspace(time_measurements_t1.min(), time_measurements_t1.max(), len(ground_truth_df))
+
+x1_measurements_t2 = measurements_t2['x1'].values
+x2_measurements_t2 = measurements_t2['x2'].values
+time_measurements_t2 = np.arange(len(measurements_t2))
+# time_interpolation_t2 = np.linspace(time_measurements_t2.min(), time_measurements_t2.max(), len(ground_truth_t1))
 
 # Crear interpolaciones cuadráticas
-interpolator2_x1_quadratic = interp1d(time_measurements, x1_measurements, kind='quadratic')
-interpolator2_x2_quadratic = interp1d(time_measurements, x2_measurements, kind='quadratic')
+interpolator_t1_x1 = interp1d(time_measurements_t1, x1_measurements_t1, kind='quadratic')
+interpolator_t1_x2 = interp1d(time_measurements_t1, x2_measurements_t1, kind='quadratic')
 
-#
-interpolator1_x1_quadratic = ej2.interpolator_x1_quadratic
-interpolator_x2_quadratic = ej2.interpolator_x2_quadratic
+interpolator_t2_x1 = interp1d(time_measurements_t2, x1_measurements_t2, kind='quadratic')
+interpolator_t2_x2 = interp1d(time_measurements_t2, x2_measurements_t2, kind='quadratic')
 
-# # Definir la función que representa la diferencia entre las interpolaciones
-# def difference_function(t, k):
-#     x1_i1 = interpolator2_x1_quadratic(t)
-#     x2_i1 = interpolator2_x2_quadratic(t)
-#     x1_i2 = interpolator1_x1_quadratic(k)
-#     x2_i2 = interpolator_x2_quadratic(k)
-#     return np.array([x1_i1 - x1_i2, x2_i1 - x2_i2])
+# test
+def f(x):
+    t = x[0]
+    t_prime = x[1]
+    x1 = interpolator_t1_x1(t) - interpolator_t2_x1(t_prime)
+    x2 = interpolator_t1_x2(t) - interpolator_t2_x2(t_prime)
+    return np.array([x1, x2])
 
-# # Adivinanza inicial para el método de Newton
-# t_initial_guess = 0.5
-# k_initial_guess = 0.5
+# Definir la función que resuelve el sistema de ecuaciones no lineales con el método de Newton-Raphson
+def find_intersection():
+    initial_guess = [0.5, 0.5]  # Estimación inicial
+    t_solution, t_prime_solution = newton_krylov(f, initial_guess, verbose=True)
+    return t_solution, t_prime_solution
 
-# # Resolver el sistema de ecuaciones no lineales con el método de Newton multivariado
-# t_solution, k_solution = newton_krylov(difference_function, [t_initial_guess, k_initial_guess])
+# Encontrar la intersección de las curvas
+t_solution, t_prime_solution = find_intersection()
 
-# # Calcular las coordenadas de la intersección
-# x1_intersection = interpolator2_x1_quadratic(t_solution)
-# x2_intersection = interpolator2_x2_quadratic(t_solution)
+# Calcular las coordenadas de la intersección
+x1_intersection_t1 = interpolator_t1_x1(t_solution)
+x2_intersection_t1 = interpolator_t1_x2(t_solution)
+x1_intersection_t2 = interpolator_t2_x1(t_prime_solution)
+x2_intersection_t2 = interpolator_t2_x2(t_prime_solution)
 
-# print("Coordenadas de la intersección:")
-# print("x1:", x1_intersection)
-# print("x2:", x2_intersection)
-# print("t:", t_solution)
-# print("k:", k_solution)
+# Imprimir los resultados
+print("CONFIRMEMOS SI ES RAÍZ")
+print(f([t_solution, t_prime_solution]))
+print("Coordenadas de la intersección:")
+print("Vehículo1_x1:", x1_intersection_t1)
+print("Vehículo1_x2:", x2_intersection_t1)
+print("Vehículo2_x1:", x1_intersection_t2)
+print("Vehículo2_x2:", x2_intersection_t2)
+print("t:", t_solution)
+print("t_prime:", t_prime_solution)
