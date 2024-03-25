@@ -9,26 +9,11 @@ def f_original(x):
     return (0.3) ** np.abs(x) * np.sin(4 * x) - np.tanh(2 * x) + 2
 
 
-def chebyshev_points(a, b, n):
-    k = np.arange(1, n+1)
-    return 0.5 * (a + b) + 0.5 * (b - a) * np.cos((2 * k - 1) / (2 * n) * np.pi)
 
-a, b = -4, 4 
-n = 15 # Número de puntos de Chebyshev
-
-x_cheb = chebyshev_points(a, b, n)
-y_cheb = f_original(x_cheb)
-
-poly = lagrange(x_cheb, y_cheb) #lagrange chebyshev
-
-# Puntos para graficar la función original
-x_chev_tograf = np.linspace(a, b, 1000)
-y_original = f_original(x_chev_tograf)
-y_interpolated_bychev = poly(x_chev_tograf) #cheb
 
 ##interpolacion lineal de lagrange----------------------
 
-x_data_lineal = np.linspace(-4, 4, num=15)  
+x_data_lineal = np.linspace(-4, 4, num=9)  
 y_data_lineal = f_original(x_data_lineal)
 
 polys = []
@@ -47,43 +32,41 @@ for i, poly in enumerate(polys):
 
 # Interpolación cúbica----------
 
-x_interp_splines = np.linspace(-4, 4, 15)  
+x_interp_splines = np.linspace(-4, 4, 9)  
 y_interp_splines = f_original(x_interp_splines)
 
 spline = CubicSpline(x_interp_splines, y_interp_splines)
 
 x_value_splines = np.linspace(-4, 4, 1000)
-y_value_splines = spline(x_value_splines)
+y_splines_interpolated = spline(x_value_splines)
     
 #interpolacion polinomica----------------
-x_values_polinomic = np.linspace(-4, 4, 1000)# conjunto de puntos para graficar las interpolaciones lineales
-y_values_polinomic = np.zeros_like(x_values_lineal)
-def equispaced_dataset_build(points_number, f): # points_number>=2
-    data_set = []
-    for x_i in np.linspace(-4, 5, points_number):     # genera puntos equiespaciados
-        data_set.append([x_i, f(x_i)])
-    return data_set
 
-def lagrange_interpolation(data_set):
-    x_values = [point[0] for point in data_set]
-    y_values = [point[1] for point in data_set]
-    interpolator = lagrange(x_values, y_values)     
-    return interpolator                             
+x_interp_lagrange = np.linspace(-4, 4, 9)
+y_interp_lagrange = f_original(x_interp_lagrange)
+
+interpolator_poli = lagrange(x_interp_lagrange, y_interp_lagrange)
 
 
-y_values_polinomic = f_original(x_values_polinomic)
-plt.plot(x_values_polinomic, y_values_polinomic, label='f_a(x)')
-    
+x_values_polinomic = np.linspace(-4, 4, 1000)# Puntos para graficar
+y_interp_points = interpolator_poli(x_values_polinomic)
 
-data_set_20 = equispaced_dataset_build(10, f_original)
-interpolator_poli = lagrange_interpolation(data_set_20)
-yvalues_polinomic = interpolator_poli(x_values_polinomic)
-plt.plot(x_values_polinomic, yvalues_polinomic, label='p_a(x)', linestyle='--')
-    
-# Graficar los puntos utilizados por el polinomio interpolante
-x_interp_points = [point[0] for point in data_set_20]
-y_interp_points = [point[1] for point in data_set_20]
+#interpolacion lagrange con chevbyshev--------
+def chebyshev_points(a, b, n):
+    k = np.arange(1, n+1)
+    return 0.5 * (a + b) + 0.5 * (b - a) * np.cos((2 * k - 1) / (2 * n) * np.pi)
 
+a, b = -4, 4 
+n = 15 
+x_cheb = chebyshev_points(a, b, n)
+y_cheb = f_original(x_cheb)
+
+poly = lagrange(x_cheb, y_cheb) 
+
+
+x_chev_tograf = np.linspace(a, b, 1000)# Puntos para graficar la función original
+y_original = f_original(x_chev_tograf)
+y_interpolated_bychev = poly(x_chev_tograf) 
 
 #error-----------
 
@@ -113,66 +96,46 @@ def texto_error(max_abs_err, max_rel_err, avg_abs_err, avg_rel_err):
              f"Error Relativo Promedio: {avg_rel_err:.5f}"
 
 
-
 error_text_chevbyshev = calculate_errors(y_original, y_interpolated_bychev) ## es lo mismo pero mejor cambiar a como estan las otras
 error_text_lineal = calculate_errors(f_original(x_values_lineal), y_values_interpolated)
-error_text_spline = calculate_errors(f_original(x_value_splines), y_value_splines)
-error_text_polinomic = calculate_errors(y_values_polinomic, yvalues_polinomic)
+error_text_spline = calculate_errors(f_original(x_value_splines), y_splines_interpolated)
+error_text_polinomic = calculate_errors(f_original(x_values_polinomic), y_interp_points)
 
 
-fig = plt.figure(figsize=(25, 6))
+fig, ax = plt.subplots(3, 1, figsize=(8, 12))
 
+# Interpolación lineal
+ax[0].plot(x_values_lineal, f_original(x_values_lineal), label='Función Original', color='blue')
+ax[0].plot(x_values_lineal, y_values_interpolated, label='Interpolación', linestyle='--', color='red')
+ax[0].scatter(x_data_lineal, y_data_lineal, label='Puntos de Datos', color='black')
+ax[0].set_title('Interpolación Lineal')
+ax[0].text(-4, np.min(f_original(x_values_lineal)), error_text_lineal, fontsize=8, va='bottom', ha='left', color='red',  bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
+ax[0].set_xlabel('x')
+ax[0].set_ylabel('y')
+ax[0].legend()
+ax[0].grid(True)
 
+# Interpolación polinómica de Lagrange
+ax[1].plot(x_values_polinomic, f_original(x_values_polinomic), label='Función Original', color='orange')
+ax[1].plot(x_values_polinomic, y_interp_points, label='Interpolación', linestyle='--', color='red')
+ax[1].scatter(x_interp_lagrange, y_interp_lagrange, label='Puntos de Datos', color='black')
+ax[1].set_title('Interpolación Polinómica de Lagrange')
+ax[1].text(-4, np.min(f_original(x_values_polinomic)), error_text_polinomic, fontsize=8, va='bottom', ha='left', color='red',  bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
+ax[1].set_xlabel('x')
+ax[1].set_ylabel('y')
+ax[1].legend()
+ax[1].grid(True)
 
-##graf lineal
-ax1 = fig.add_subplot(2, 2, 1)
-ax1.plot(x_values_lineal, f_original(x_values_lineal), label='Función Original', color='orange')
-ax1.plot(x_values_lineal, y_values_interpolated, label='Interpolación', linestyle='--', color='red')
-ax1.scatter(x_data_lineal, y_data_lineal, label='Puntos de Datos', color='black')
-ax1.set_title('Interpolación Lineal de Lagrange')
-ax1.text(-4, np.min(f_original(x_values_lineal)), error_text_lineal, fontsize=8, va='bottom', ha='left', color='red',  bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
-ax1.set_xlabel('x')
-ax1.set_ylabel('y')
-ax1.legend()
-ax1.grid(True)
-
-##graf chebyshev
-ax2 = fig.add_subplot(2, 2, 2)
-ax2.plot(x_chev_tograf, y_original, label='Función Original')
-ax2.plot(x_chev_tograf, y_interpolated_bychev, label='Interpolación', linestyle='--', color='red')
-ax2.plot(x_cheb, y_cheb, 'ro', label='Puntos de Chebyshev', color='black')
-ax2.set_xlabel('x')
-ax2.set_ylabel('y')
-ax2.set_title('Interpolación con puntos de Chebyshev')
-ax2.text(a, np.min(y_original), error_text_chevbyshev, fontsize=8, va='bottom', ha='left', color='red', bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
-ax2.legend()
-ax2.grid(True)
-
-#interpolacion polinomica
-ax3 = fig.add_subplot(2, 2, 3)
-ax3.scatter(x_interp_points, y_interp_points, color='black', label='Puntos de interpolación')
-ax3.plot(x_values_polinomic, yvalues_polinomic, label='Interpolacion', linestyle='--', color='red')
-ax3.plot(x_values_polinomic, y_values_polinomic, label='Funcion original', color='violet')
-ax3.set_xlabel('x')
-ax3.set_ylabel('y')
-ax3.set_xlim(-4.5, 4.5)
-ax3.set_title('Interpolacion Polinomica')
-ax3.text(-4, np.min(y_values_polinomic), error_text_polinomic, fontsize=8, va='bottom', ha='left', color='red',  bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
-ax3.legend()
-ax3.grid(True)
-
-
-##graf spline
-ax4 = fig.add_subplot(2, 2, 4)
-ax4.plot(x_value_splines, f_original(x_value_splines), label='Función Original', color='green')
-ax4.plot(x_value_splines, y_value_splines, label='Interpolación', linestyle='--', color='red')
-ax4.scatter(x_interp_splines, y_interp_splines, label='Puntos de Datos', color='black')
-ax4.set_title('Interpolación con Splines Cubicos')
-ax4.text(-4, np.min(f_original(x_value_splines)), error_text_spline, fontsize=8, va='bottom', ha='left', color='red',  bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
-ax4.set_xlabel('x')
-ax4.set_ylabel('y')
-ax4.legend()
-ax4.grid(True)
+# Graficar Splines
+ax[2].plot(x_value_splines, f_original(x_value_splines), label='Función Original', color='green')
+ax[2].plot(x_value_splines, y_splines_interpolated, label='Interpolación', linestyle='--', color='red')
+ax[2].scatter(x_interp_splines, y_interp_splines, label='Puntos de Datos', color='black')
+ax[2].set_title('Interpolación con Splines Cúbicos')
+ax[2].text(-4, np.min(f_original(x_value_splines)), error_text_spline, fontsize=8, va='bottom', ha='left', color='red',  bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
+ax[2].set_xlabel('x')
+ax[2].set_ylabel('y')
+ax[2].legend()
+ax[2].grid(True)
 
 
 
@@ -182,3 +145,21 @@ plt.subplots_adjust(bottom=0.2)
 plt.tight_layout()
 plt.show()
 
+
+
+fig = plt.figure(figsize=(10, 7))
+
+ax1 = fig.add_subplot(3, 2, 1)
+
+
+##graf chebyshev
+ax2 = fig.add_subplot(3, 1, 2)
+ax2.plot(x_chev_tograf, y_original, label='Función Original')
+ax2.plot(x_chev_tograf, y_interpolated_bychev, label='Interpolación', linestyle='--', color='red')
+ax2.plot(x_cheb, y_cheb, 'ro', label='Puntos de Chebyshev', color='black')
+ax2.set_xlabel('x')
+ax2.set_ylabel('y')
+ax2.set_title('Interpolación con puntos de Chebyshev')
+ax2.text(a, np.min(y_original), error_text_chevbyshev, fontsize=8, va='bottom', ha='left', color='red', bbox=dict(facecolor='white', alpha=0.5, edgecolor='black'))
+ax2.legend()
+ax2.grid(True)
